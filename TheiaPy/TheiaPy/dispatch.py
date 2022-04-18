@@ -47,9 +47,10 @@ class Dispatcher:
                 self.logger.debug("_handle_line: updating bot_info")
                 self.bot_info = mdata
 
-            if mtype == "PluginConfig" and mdata["name"] == self.name:
-                self.logger.debug("_handle_line: updating plugin_cfg")
-                self.plugin_cfg = mdata["config"]
+            if mtype == "PluginConfig":
+                if "plugin-name" in mdata and mdata["plugin-name"] == self.name:
+                    self.logger.debug("_handle_line: updating plugin_cfg")
+                    self.plugin_cfg = mdata
 
             if mtype in self._on_mtype_hooks:
                 self.logger.debug(f"_handle_line: calling hooks for mtype={mtype!r}")
@@ -60,3 +61,10 @@ class Dispatcher:
         self.logger.info(f"started")
         for line in sys.stdin:
             self._handle_line(line.rstrip())
+
+    def config_get(self, key, default=None):
+        for cfgtype in ["config-bot", "config-plugin"]:
+            if cfgtype in self.plugin_cfg and key in self.plugin_cfg[cfgtype]:
+                return self.plugin_cfg[cfgtype][key]
+
+        return default
