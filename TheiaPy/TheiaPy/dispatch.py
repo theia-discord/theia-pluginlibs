@@ -28,7 +28,9 @@ class Dispatcher:
         def inner(func):
             @functools.wraps(func)
             def wrapper(mdata, *args, **kwargs):
-                if not mdata["cmd"]["command"] == cmdname:
+                if not mdata["message"]["command_invocation"]:
+                    return None
+                if not mdata["message"]["command_invocation"]["command"] == cmdname:
                     return None
 
                 return func(mdata, *args, **kwargs)
